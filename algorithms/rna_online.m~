@@ -1,0 +1,76 @@
+function [xout,param,fxplus] = rna_online(finfo,x,k,param)
+
+fp = finfo.fp;
+
+% init
+if(~isfield(param,'U'))
+    param.U = zeros(length(x),param.window_size);
+end
+if(~isfield(param,'x_seq'))
+    param.x_seq = zeros(length(x),param.window_size+1);
+end
+if(~isfield(param,'L'))
+    param.L = finfo.L;
+end
+if(~isfield(param,'old_t'))
+    param.old_t = 1;
+end
+
+g = fp(x);
+if(param.backtracking == 1)
+    fold = finfo.f(x);
+    normg = norm(g);
+    xplus = x - g/param.L;
+    fxplus = finfo.f(xplus);
+    while(fxplus > fold - (1/(2*param.L))*normg^2) % descent condition
+        param.L = param.L*2;
+        xplus = x - g/param.L;
+        fxplus = finfo.f(xplus);
+    end
+elseif(param.backtracking == 2)
+    error('pwet.')
+    funObj = @(x) convert_finfo(x);
+    f_
+    t = WolfeLineSearch_minfunc(x,param.old_t,d_,f_,g_,funObj);
+    param.old_t = t;
+else
+    xplus = x - g/param.L;
+    fxplus = finfo.f(xplus);
+end
+
+
+param.x_seq = [param.x_seq(:,2:end), x - g/finfo.L];
+
+param.U = [param.U(:,2:end) g];
+UU = param.U'*param.U;
+UU = UU/norm(UU);
+
+[ x_rna, c ] = ampe( param.x_seq, UU, 1e-9 );
+
+frna = finfo.f(x_rna);
+
+if(c(end)~=1)
+    if(frna < fxplus )
+        xplus = x_rna;
+        fxplus = frna;
+    end
+else
+    disp(c);
+end
+
+xout = xplus;
+
+if(param.backtracking)
+    param.L = param.L/2;
+end
+
+    function [obj,grad] = convert_finfo(x)
+        
+        valf_handle = @(x) finfo.f(x) + finfo.proxoperator.f(x);
+        valfp_handle = @(x) finfo.fp(x) + finfo.proxoperator.fp(x);
+        
+        obj = valf_handle(x);
+        grad = valfp_handle(x);
+        
+    end
+end
