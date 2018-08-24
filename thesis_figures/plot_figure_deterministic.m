@@ -40,7 +40,7 @@ if(false)
     axis([0,100,1e-2,1e1])
     set(gca,'fontsize',fs,'color','none')
     legend(legendcell,'interpreter','latex','fontsize',fs_legend);
-    export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_comparison'],'-transparent','-eps')
+    % export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_comparison'],'-transparent','-eps')
     
     
     
@@ -68,7 +68,7 @@ if(false)
     axis([0,100,1e-2,1e1])
     set(gca,'fontsize',fs,'color','none')
     legend(legendcell,'interpreter','latex','fontsize',fs_legend,'box','off');
-    export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_comparison'],'-transparent','-eps')
+    % export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_comparison'],'-transparent','-eps')
 end
 %% loops over all figures
 
@@ -76,7 +76,7 @@ datasetCell = {'sonar','madelon','sido0'};
 reg_nameCell = {'well_cond','regular_cond','bad_cond'};
 lambda_name = 'lambda_1e-8';
 
-if(false)
+if(true)
     
     % Print iteration
     for dataset = datasetCell
@@ -99,7 +99,7 @@ if(false)
             xlabel('Iteration (Gradient oracle calls)','interpreter','latex')
             ylabel('$f(x)-f(x^*)$','interpreter','latex')
             set(gca,'fontsize',fs,'color','none')
-            export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_ite'],'-transparent','-eps')
+            % export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_ite'],'-transparent','-eps')
             %         legend(legendcell,'box','off','interpreter','latex','fontsize',fs_legend,'location','best')
         end
     end
@@ -125,7 +125,7 @@ if(false)
             xlabel('Time (s)','interpreter','latex')
             ylabel('$f(x)-f(x^*)$','interpreter','latex')
             set(gca,'fontsize',fs,'color','none')
-            export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_time'],'-transparent','-eps')
+            % export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_time'],'-transparent','-eps')
             %         legend(legendcell,'box','off','interpreter','latex','fontsize',fs_legend,'location','best')
         end
     end
@@ -170,7 +170,7 @@ if(true)
     set(h, 'Position', rect)
     
     set(gca,'visible','off')
-    export_fig([folder_figs,'legend_logistic_determ'],'-transparent','-eps')
+    % export_fig([folder_figs,'legend_logistic_determ'],'-transparent','-eps')
     
     
 end

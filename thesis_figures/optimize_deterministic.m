@@ -21,8 +21,8 @@ paramFunction.approxL = approxL;
 load_function
 
 % reg = 1e-3*finfo.L; reg_name = 'well_cond';  % well conditionned
-% reg = 1e-6*finfo.L; reg_name = 'regular_cond'; % normal conditionned
-reg = 1e-9*finfo.L; reg_name = 'bad_cond'; % badly conditionned
+reg = 1e-6*finfo.L; reg_name = 'regular_cond'; % normal conditionned
+% reg = 1e-9*finfo.L; reg_name = 'bad_cond'; % badly conditionned
 paramFunction.lambda = reg;
 
 load_function;
@@ -88,6 +88,7 @@ for i=1:nAlgo
     algo = algoCell_online{i};
     param = algo.param;
     
+    param.backtracking = true;
     param.dorna = true;
     param.online = true;
     param.window_size = window_size;
@@ -126,7 +127,7 @@ for i=1:length(algoCell_all)
     semilogy(iter,algo.fval,'linewidth',lw,'color',algo.color,'linestyle',algo.linestyle);
     hold on
 end
-% legend(legendCell,'interpreter','latex','fontsize',fs);
+legend(legendCell,'interpreter','latex','fontsize',fs);
 set(gca,'fontsize',fs)
 
 % save(['thesis_figures/matfiles/logistic_',dataset,'_',reg_name,'_',lambda_name])
