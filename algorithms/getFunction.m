@@ -46,6 +46,46 @@ if strcmpi(type, 'LeastSquare')
     finfo.fstar = 0;
 end
 
+
+
+if strcmpi(type, 'LeastSquare2')
+    
+    A = param.X';
+    b = param.y;
+    lambda = param.lambda;
+    
+    AA = A'*A;
+    I = eye(size(AA));
+    AA = AA + lambda*I;
+    
+    Ab = A'*b;
+    finfo.xstar = AA\Ab;
+    n = size(AA,1);
+    
+    finfo.L = norm(AA);
+    finfo.mu = lambda; % sm for smallest eigenvalues
+    
+    finfo.fp = @(x) AA*x-Ab;
+    finfo.A = AA;
+    finfo.b = Ab;
+%     finfo.fp = @(x) A'*(A*x-b)+lambda*x;
+%     finfo.f = @(x) 0.5*(norm(A*x-b)^2 + lambda*norm(x)^2);
+    finfo.f = @(x) norm(A*x-b)^2 + lambda*norm(x)^2; % instead of real f, we compute the residual
+    finfo.fpp = @(x) AA ;
+    finfo.n = n;
+    finfo.x0 = param.x0;
+    
+    finfo.lscoeffun = @(x,p) (p'*finfo.fp(x))/(p'*AA*p);
+    finfo.lsfun = @(x,p) x - finfo.lscoeffun(x,p)*p;
+    
+    finfo.lscoefnormx = @(x,p) (p'*(x-finfo.xstar))/(p'*p);
+    
+    finfo.lscoefnormgrad = @(x,p) (p'*AA*finfo.fp(x))/(norm(AA*p))^2;
+    finfo.lsnormgrad = @(x,p) x - finfo.lscoefnormgrad(x,p)*p;
+    finfo.fstar = finfo.f(finfo.xstar);
+end
+
+
 if(strcmpi(type,'normx4'))
     n = param.n;
     A = rand(n);

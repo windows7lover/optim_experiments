@@ -23,6 +23,9 @@ end
 if(~isfield(param,'L'))
     param.L = finfo.L;
 end
+if(~isfield(param,'y_seq'))
+    param.y_seq = [];
+end
 
 if(~isfield(param,'dorna'))
     param.dorna = 1;
@@ -73,12 +76,17 @@ if( size(param.x_seq,2) < param.window_size+1)
     param.steplength = [param.steplength, 1/param.L];
     param.x_seq = [param.x_seq, new_rna_point];
     param.U = [param.U g];
+    param.y_seq = [param.y_seq yold];
 else
     param.steplength = [param.steplength(:,2:end), 1/param.L];
     param.x_seq = [param.x_seq(:,2:end), new_rna_point];
     param.U = [param.U(:,2:end) g];
+    param.y_seq = [param.y_seq(:,2:end) yold];
 end
+
 UU = param.U'*param.U;
+% UU = param.U'*param.y_seq;
+% UU = UU + UU';
 UU = UU/norm(UU);
 
 
