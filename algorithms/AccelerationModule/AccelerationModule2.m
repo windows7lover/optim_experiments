@@ -5,13 +5,22 @@ classdef AccelerationModule2
         N;
         W;
         P;
+        offset_Y; % hack for dfp
         linesearch;
+        do_accel;
+        lambda;
     end
     methods
-        function obj = AccelerationModule(N,varargin)
+        function obj = AccelerationModule2(N,varargin)
             obj.N = N;
+            obj.do_accel = true;
+            obj.offset_Y = NaN;
+            obj.lambda = 0;
+            
             if(ischar(varargin{1}))
-                obj = accelerationModuleInitializer(varargin);
+                name = varargin{1};
+                param = varargin{2};
+                obj = obj.accelerationModuleInitializer(name,param);
             else
                 obj.W = varargin{1};
                 obj.P = varargin{2};
@@ -35,26 +44,62 @@ classdef AccelerationModule2
             end
         end
         function xnew = accelerate(obj)
+            
+            if( ~obj.do_accel )
+                xnew = obj.X(:,end);
+                return;
+            end
+            
             R = obj.X-obj.Y;
             currentN = size(R,2);
             
             Precond = @(x) obj.P(R,obj.Y,x);
-            
             WR = obj.W(R,obj.Y);
-            PR = obj.P(R,obj.Y);
             
-            gamma = (WR'*R)\ones(currentN,1);
+            RWR = WR'*R;
+            gamma = (RWR + obj.lambda * eye(currentN) * norm(RWR))\ones(currentN,1);
             gamma = gamma/sum(gamma);
             
-            x0 = obj.Y*gamma;
-            step = Precond(R*gamma);
-            if isnan(obj.linesearch)
-                xnew = x0-step;
+            if isa(obj.offset_Y,'function_handle')
+                x0 = obj.Y*gamma + obj.offset_Y(R,obj.Y,R*gamma);
             else
+                x0 = obj.Y*gamma;
+            end
+            
+            step = Precond(R*gamma);
+            if isa(obj.linesearch,'function_handle')
                 xnew = obj.linesearch(x0,step);
+            else
+                xnew = x0-step;
             end
         end
-        function obj = accelerationModuleInitializer(name,varargin)
+        function obj = accelerationModuleInitializer(obj,name,param)
+            
+            if(~isfield(param,'linesearch'))
+                param.linesearch = nan;
+            end
+            obj.linesearch = param.linesearch;
+            
+            
+            if(~isfield(param,'lambda'))
+                param.lambda = 0;
+            end
+            obj.lambda = param.lambda;
+            
+            
+            
+            
+            
+            %%%%%%%%%%%
+            % Nothing %
+            %%%%%%%%%%%
+            
+            if strcmpi(name,'none')
+                obj.do_accel = false;
+            end
+            
+            
+            
             
             %%%%%%%%%%%%%%%%%%%%%%%%%
             % Anderson Acceleration %
@@ -62,20 +107,18 @@ classdef AccelerationModule2
             
             if strcmpi(name,'good_anderson')
                 %Inputs
-                beta = varargin{1};
-                obj.linesearch = varargin{2};
+                beta = param.beta;
                 
                 obj.W = @(R,Y) Y;
-                obj.P = @(R) beta*R;
+                obj.P = @(R,Y,Rgamma) beta*Rgamma;
             end
             
             if strcmpi(name,'bad_anderson')
                 %Inputs
-                beta = varargin{1};
-                obj.linesearch = varargin{2};
+                beta = param.beta;
                 
                 obj.W = @(R,Y) R;
-                obj.P = @(R) beta*R;
+                obj.P = @(R,Y,Rgamma) beta*Rgamma;
             end
             
             
@@ -85,9 +128,8 @@ classdef AccelerationModule2
             
             if strcmpi(name,'good_broyden')
                 %Inputs
-                H0 = varargin{1};
-                M = varargin{2};
-                obj.linesearch = varargin{3};
+                H0 = param.H0;
+                M = param.M;
                 
                 obj.W = @(R,Y) H0*(M\Y);
                 obj.P = @(R,Y,Rgamma) H0*Rgamma;
@@ -95,9 +137,8 @@ classdef AccelerationModule2
             
             if strcmpi(name,'bad_broyden')
                 %Inputs
-                H0 = varargin{1};
-                M = varargin{2};
-                obj.linesearch = varargin{3};
+                H0 = param.H0;
+                M = param.M;
                 
                 obj.W = @(R,Y) M*R;
                 obj.P = @(R,Y,Rgamma) H0*Rgamma;
@@ -115,14 +156,14 @@ classdef AccelerationModule2
                 warning('DFP only support M=I and H_0 = inv(J_0) = beta*I.')
                 
                 %Inputs
-                H0 = varargin{1};
-%                 M = varargin{2};
-                obj.linesearch = varargin{2};
+                H0 = param.H0;
+%                 M = param.M;
                 
                 C = @(x) diff(x,1,2);
                 
                 obj.W = @(R,Y) R;
-                obj.P = @(R,Y,Rgamma) H0*R + C(Y)* ( (C(Y)'*C(R))\(C(Y)'*Rgamma) ) ;
+                obj.P = @(R,Y,Rgamma) H0*Rgamma ;
+                obj.offset_Y = @(R,Y,Rgamma) C(Y)* ( (C(Y)'*C(R))\(C(Y)'*Rgamma) ) ;
             end
             
             
@@ -131,9 +172,8 @@ classdef AccelerationModule2
                 warning('BFGS only support M=I and H_0 = inv(J_0) = beta*I.')
                 
                 %Inputs
-                H0 = varargin{1};
-%                 M = varargin{2};
-                obj.linesearch = varargin{2};
+                H0 = param.H0;
+%                 M = param.M;
                 
                 C = @(x) diff(x,1,2);
                 
@@ -145,8 +185,7 @@ classdef AccelerationModule2
             if strcmpi(name,'SRK')
                 
                 %Inputs
-                H0 = varargin{1};
-                obj.linesearch = varargin{2};
+                H0 = param.H0;
                 
                 C = @(x) diff(x,1,2);
                 

@@ -23,15 +23,15 @@ paramFunction.lambda = 0;
 paramFunction.x0 = rand(nFeatures+1,1);
 
 
-% getf = @(x) getFunction('logistic' , x); solve_problem = true;
-getf = @(x) getFunction('leastsquare2' , x); solve_problem = false;
+getf = @(x) getFunction('logistic' , x); solve_problem = true;
+% getf = @(x) getFunction('leastsquare2' , x); solve_problem = false;
 
 
 finfo = getf(paramFunction);
 
-% reg = 1e-3*finfo.L; reg_name = 'well_cond';  % well conditionned
+reg = 1e-3*finfo.L; reg_name = 'well_cond';  % well conditionned
 % reg = 1e-6*finfo.L; reg_name = 'regular_cond'; % normal conditionned
-reg = 1e-9*finfo.L; reg_name = 'bad_cond'; % badly conditionned
+% reg = 1e-9*finfo.L; reg_name = 'bad_cond'; % badly conditionned
 paramFunction.lambda = reg;
 
 finfo = getf(paramFunction);
@@ -66,33 +66,29 @@ end
 warning off
 
 g = @(x) x-finfo.fp(x)/finfo.L;
-nIter = 100;
-N = 10;
-C = nan;
-beta = -1;
-% beta = nan;
-gamma = @(N) [zeros(N-1,1) ; 1] ;
-% gamma = @(N) ones(N,1)/N ;
-normalization = 'inverse';
-% normalization = 'none';
+nIter = 1000;
+N = 50;
+beta = 1;
 % do_online = false;
 do_online = true;
 
 lshandle = finfo.lsfun;
 % lshandle = finfo.lsnormgrad;
 
-module_cell = {};
 
-i=1;
-module_cell{i} = AccelerationModule(1,0,'none',beta,normalization,gamma,C,lshandle,finfo); i=i+1;
-module_cell{i} = AccelerationModule(N,0,'good_anderson',beta,normalization,gamma,C,lshandle,finfo); i=i+1;
-module_cell{i} = AccelerationModule(N,0,'bad_anderson',beta,normalization,gamma,C,lshandle,finfo); i=i+1;
-module_cell{i} = AccelerationModule(N,0,'good_broyden',beta,normalization,gamma,C,lshandle,finfo); i=i+1;
-module_cell{i} = AccelerationModule(N,0,'bad_broyden',beta,normalization,gamma,C,lshandle,finfo); i=i+1;
-module_cell{i} = AccelerationModule(N,0,'bfgs',beta,normalization,gamma,C,lshandle,finfo); i=i+1;
-module_cell{i} = AccelerationModule(N,0,'conjgrad',beta,normalization,gamma,C,lshandle,finfo); i=i+1;
-% module_cell{i} = AccelerationModule(N,0,'adagrad',beta,normalization,gamma,C,lshandle,finfo); i=i+1;
-% bfgsModule = AccelerationModule(N,0,'bfgs',0,normalization,gamma,,C,lshandle,finfo);
+% module_name = {'none','good_anderson','bad_anderson','good_broyden','bad_broyden','bfgs','dfp','conjgrad','gmres'};
+module_name = {'none','good_anderson','bad_anderson','good_broyden','bad_broyden','bfgs','dfp'};
+module_cell = cell(length(module_name),1);
+
+param.beta = beta;
+param.H0 = beta;
+param.M = 1;
+param.lambda = 1e-6;
+% param.linesearch = @finfo.lsfun;
+
+for i=1:length(module_name)
+    module_cell{i} = AccelerationModule2(N,module_name{i},param);
+end
 
 
 x0 = finfo.x0;
@@ -101,8 +97,6 @@ x0 = finfo.x0;
 meter_cell = cell(length(module_cell),1);
 for i=1:length(module_cell)
     [~,module_cell{i},meter_cell{i}] = iterate_module(x0,g,nIter,module_cell{i},finfo,do_online);
-%     module_adagrad = AccelerationModule(nIter,0,'adagrad',beta,normalization,gamma,C,lshandle,finfo);
-%     [~,module_cell{i},meter_cell{i}] = iterate_module_adagrad(x0,g,module_adagrad,nIter,module_cell{i},finfo,do_online);
 end
 
 %%
@@ -154,7 +148,7 @@ end
 
 legend_cell = cell(length(module_cell),1);
 for i=1:length(module_cell)
-    legend_cell{i} = module_cell{i}.accelerationType;
+    legend_cell{i} = module_name{i};
 end
 legend(legend_cell,'interpreter','none')
 title('Legend','interpreter','latex')
