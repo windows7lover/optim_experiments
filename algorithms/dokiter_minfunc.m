@@ -1,4 +1,4 @@
-function [solution,algo_tolf,algo_tolx,algoparam,time_ite] = dokiter_minfunc(algoparam,~,nIteMax,finfo,tolfun,nIterTol)
+function [solution,algo_tolf,algo_tolx,algoparam,time_ite,nFunCount] = dokiter_minfunc(algoparam,~,nIteMax,finfo,tolfun,nIterTol)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -89,6 +89,7 @@ x0 = finfo.x0;
 
 t_beg = cputime;
 [solution,~,exitflag,output] = minFunc(funObj,x0,options);
+nFunCount = output.funcCount;
 display(exitflag)
 t_end = cputime;
 

@@ -76,7 +76,7 @@ datasetCell = {'sonar','madelon','sido0'};
 reg_nameCell = {'well_cond','regular_cond','bad_cond'};
 lambda_name = 'lambda_1e-8';
 
-if(true)
+if(false)
     
     % Print iteration
     for dataset = datasetCell
@@ -143,15 +143,15 @@ for dataset = datasetCell
         reg_name = reg_name{1};
         disp('\begin{figure}[h]')
         disp('\centering')
-        disp(['\includegraphics[width=0.42\textwidth]{', folder_figs_latex,getName(dataset,reg_name,lambda_name), '_ite.eps}'])
-        disp(['\includegraphics[width=0.42\textwidth]{', folder_figs_latex,getName(dataset,reg_name,lambda_name), '_time.eps}'])
+        disp(['\includegraphics[width=0.4\textwidth]{', folder_figs_latex,getName(dataset,reg_name,lambda_name), '_ite.eps}'])
+        disp(['\includegraphics[width=0.4\textwidth]{', folder_figs_latex,getName(dataset,reg_name,lambda_name), '_time.eps}'])
         disp('\end{figure}')
     end
 end
 
 %% Print legend only
 
-if(true)
+if(false)
     
     load(getFile('sonar','well_cond','lambda_1e-8'),'algoCell_all');
     

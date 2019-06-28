@@ -19,7 +19,7 @@ datasetCell = {'sonar','madelon','sido0'};
 reg_nameCell = {'well_cond','regular_cond','bad_cond'};
 lambda_name = 'lambda_1e-8';
 
-if(false)
+if(true)
     
     % Print iteration
     for dataset = datasetCell
@@ -34,11 +34,13 @@ if(false)
                 hold on
             end
             %         axis tight
+            legend(legendcell)
             set(gca, 'XLimSpec', 'Tight');
             xlabel('Epoch','interpreter','latex')
             ylabel('$f(x)-f(x^*)$','interpreter','latex')
             set(gca,'fontsize',fs,'color','none')
-            export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_ite'],'-transparent','-eps')
+            % export_fig([folder_figs,getName(dataset,reg_name,lambda_name),'_ite'],'-transparent','-eps')
+            pause
         end
     end
     
@@ -66,7 +68,7 @@ end
 
 %% Generates text for latex
 
-if(false)
+if(true)
     clc
     folder_figs_latex = 'figs/';
     for dataset = datasetCell
@@ -78,8 +80,8 @@ if(false)
             reg_name = reg_name{1};
             disp('\begin{figure}[h]')
             disp('\centering')
-            disp(['\includegraphics[width=0.42\textwidth]{', folder_figs_latex,getName(dataset,reg_name,lambda_name), '_ite.eps}'])
-            disp(['\includegraphics[width=0.42\textwidth]{', folder_figs_latex,getName(dataset,reg_name,lambda_name), '_time.eps}'])
+            disp(['\includegraphics[width=0.4\textwidth]{', folder_figs_latex,getName(dataset,reg_name,lambda_name), '_ite.eps}'])
+            disp(['\includegraphics[width=0.4\textwidth]{', folder_figs_latex,getName(dataset,reg_name,lambda_name), '_time.eps}'])
             disp('\end{figure}')
         end
     end
