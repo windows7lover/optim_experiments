@@ -107,7 +107,37 @@ if(true)
     set(h, 'Position', rect)
     
     set(gca,'visible','off')
-    export_fig([folder_figs,'legend_logistic_stochastic'],'-transparent','-eps')
+    % export_fig([folder_figs,'legend_logistic_stochastic'],'-transparent','-eps')
+    
+    
+end
+
+
+%% Print legend only small
+
+if(true)
+    
+    load(getFile('sonar','well_cond','lambda_1e-8'),'algoCell_all');
+    
+    p = {};
+    legendcell = {};
+    algoCell_small = algoCell_all([1 3 4 6 7 9 10]);
+    for i=1:length(algoCell_small)
+        algoCell_small{i}.fval = 1;
+        algoCell_small{i}.iter = 1;
+        [legendcell, p{i}] = plot_algo(algoCell_small{i},1,legendcell);
+        hold on
+    end
+    
+    legendcell = {'SGD', 'SAGA', 'offline RNA + SGD', 'offline RNA + SAGA', 'online RNA + SGD', 'online RNA + SAGA', 'Katyusha'}
+    
+    [h] = legend(legendcell,'interpreter','latex','fontsize',fs_legend);
+    
+    rect = [0.4, 0.4, 0.25, 0.25];
+    set(h, 'Position', rect)
+    
+    set(gca,'visible','off')
+    % export_fig([folder_figs,'legend_logistic_stochastic'],'-transparent','-eps')
     
     
 end

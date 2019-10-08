@@ -10,9 +10,13 @@ color_lbfgs = 4;
 nAlgo = 4;
 colors = linspecer(nAlgo);
 
-ls = true;
-% ls = false;
 
+if(exist('ls','var'))
+    ls = backtracking
+else
+    ls = true;
+    ls = false;
+end
 
 % Define Gradient Method
 param.dorna = false;
@@ -53,7 +57,7 @@ param.accelerated = true;
 param.strong_convex = true;
 
 nest_sc.param = param;
-nest_sc.algo = @(param,nIte,finfo,nIterTol) do_k_iterations(param,@rna_first_order,nIte,finfo,emptystruct,nIterTol);
+nest_sc.algo = @(param,nIte,finfo,nIterTol) do_k_iterations(param,@rna_first_order,10*nIte,finfo,emptystruct,nIterTol);
 nest_sc.name = 'Nesterov ($1-\sqrt{\kappa}$) ';
 nest_sc.color = colors(color_nest_sc,:);
 nest_sc.linestyle = ':';

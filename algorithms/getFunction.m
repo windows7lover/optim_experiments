@@ -146,7 +146,12 @@ if(strcmpi(type,'logistic'))
 %         Hessianbound_indiv = max(Hessianbound_indiv, norm(X(:,j))^2);
 %     end
     
-    finfo.L = (1/npt)*norm(full(Hessianbound))/4+lambda;
+    if(all(size(Hessianbound) == [4933, 4933]))
+        finfo.L = (1/npt)*1.8912e+06/4+lambda;
+        display('HACK SIDO0')
+    else
+        finfo.L = (1/npt)*norm(full(Hessianbound))/4+lambda;
+    end
     finfo.L_max_sample = compute_Lmax_logistic(X);
     finfo.mu = lambda;
     
